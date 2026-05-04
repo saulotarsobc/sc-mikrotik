@@ -47,8 +47,9 @@ O repositório já fica preparado para publicar no npm pelo workflow em `.github
 ### Como publicar
 
 ```txt
-1. Commitar e enviar as mudanças para a branch principal
-2. Criar uma GitHub Release publicada
+1. Atualizar a versão em package.json
+2. Commitar e enviar as mudanças para a branch deploy
+3. Alternativamente, criar uma GitHub Release publicada
 3. O GitHub Actions executa npm ci, npm run build e npm publish --provenance
 ```
 
