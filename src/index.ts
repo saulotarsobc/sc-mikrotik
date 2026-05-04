@@ -2,10 +2,18 @@ import axios from "axios";
 import https from "node:https";
 import type { Auth } from "./interfaces/params/Auth";
 import type { Config } from "./interfaces/params/Config";
-import type { IpAddressResponse } from "./interfaces/responses/IpAddressResponse";
-import type { SystemIdentityResponse } from "./interfaces/responses/SystemIdentityResponse";
-import type { SystemResourceResponse } from "./interfaces/responses/SystemResourceResponse";
+import type { IPAddressPrintResponse } from "./interfaces/responses/IPAddressPrintResponse";
+import { PPPSecretPrintResponse } from "./interfaces/responses/PPPSecretPrintResponse";
+import { SystemIdentityPrintResponse } from "./interfaces/responses/SystemIdentityPrintResponse";
+import { SystemResourcePrintResponse } from "./interfaces/responses/SystemResourcePrintResponse";
 
+/**
+ * Mikrotik is a class that provides methods to interact with the Mikrotik REST API.
+ * It allows you to retrieve system resource information, system identity information, and IP address information from a Mikrotik device.
+ * The class uses the axios library to make HTTP requests to the Mikrotik REST API and supports basic authentication.
+ * It also allows you to configure an HTTPS agent to ignore SSL certificate errors if needed.
+ * @see https://help.mikrotik.com/docs/spaces/ROS/pages/47579162/REST+API for more information about the Mikrotik REST API.
+ */
 export class Mikrotik {
   private client = axios.create();
   private auth: Auth;
@@ -27,33 +35,65 @@ export class Mikrotik {
       baseURL: config.baseUrl,
       auth: this.auth,
       httpsAgent: this.httpsAgent,
+      headers: {
+        "Content-Type": "application/json",
+      },
     });
   }
 
-  // curl -k -u admin: https://10.155.101.214/rest/system/resource
-  public async getSystemResource(): Promise<SystemResourceResponse> {
-    const { data } =
-      await this.client.get<SystemResourceResponse>(`/system/resource`);
-    return data;
-  }
-
-  public async getSystemIdentity(): Promise<SystemIdentityResponse> {
-    const { data } =
-      await this.client.get<SystemIdentityResponse>(`/system/identity`);
+  /**
+   * Gets the system resource information from the Mikrotik device.
+   * @returns A promise that resolves to the system resource response
+   * @type {SystemResourcePrintResponse}
+   */
+  public async SystemResourcePrint(): Promise<SystemResourcePrintResponse[]> {
+    const { data } = await this.client.post<SystemResourcePrintResponse[]>(
+      `/system/resource/print`,
+    );
     return data;
   }
 
   /**
-   * This method allows getting the list of all records or a single record from the specified menu encoded in the URL.
+   * This method allows getting the system identity information.
+   * @returns A promise that resolves to the system identity response.
+   * @type {SystemIdentityPrintResponse[]}
    */
-  public async getIpAddress(): Promise<IpAddressResponse> {
-    const { data } = await this.client.get<IpAddressResponse>(`/ip/address`);
+  public async SystemIdentityPrint(): Promise<SystemIdentityPrintResponse[]> {
+    const { data } = await this.client.post<SystemIdentityPrintResponse[]>(
+      `/system/identity/print`,
+    );
+    return data;
+  }
+
+  /**
+   * This method allows getting the IP address information.
+   * @returns A promise that resolves to the IP address response.
+   * @type {IPAddressPrintResponse[]}
+   */
+  public async IPAddressPrint(): Promise<IPAddressPrintResponse[]> {
+    const { data } =
+      await this.client.post<IPAddressPrintResponse[]>(`/ip/address/print`);
+    return data;
+  }
+
+  /**
+   * This method allows getting the PPP secret information.
+   * @returns A promise that resolves to the PPP secret response.
+   * @type {PPPSecretPrintResponse}
+   */
+  public async PPPSecretPrint(): Promise<PPPSecretPrintResponse[]> {
+    const { data } =
+      await this.client.post<PPPSecretPrintResponse[]>(`/ppp/secret/print`);
     return data;
   }
 }
 
+// Exporting Parameters types
 export type { Auth } from "./interfaces/params/Auth";
 export type { Config } from "./interfaces/params/Config";
-export type { IpAddressResponse } from "./interfaces/responses/IpAddressResponse";
-export type { SystemIdentityResponse } from "./interfaces/responses/SystemIdentityResponse";
-export type { SystemResourceResponse } from "./interfaces/responses/SystemResourceResponse";
+
+// Exporting Response types
+export type { IPAddressPrintResponse } from "./interfaces/responses/IPAddressPrintResponse";
+export type { PPPSecretPrintResponse } from "./interfaces/responses/PPPSecretPrintResponse";
+export type { SystemIdentityPrintResponse } from "./interfaces/responses/SystemIdentityPrintResponse";
+export type { SystemResourcePrintResponse } from "./interfaces/responses/SystemResourcePrintResponse";

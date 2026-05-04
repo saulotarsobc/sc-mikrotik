@@ -20,15 +20,33 @@ const client = new Mikrotik({
   insecure: true,
 });
 
-const systemResource = await client.getSystemResource();
-const systemIdentity = await client.getSystemIdentity();
-const ipAddress = await client.getIpAddress();
+const systemResources = await client.SystemResourcePrint();
+const systemIdentities = await client.SystemIdentityPrint();
+const ipAddresses = await client.IPAddressPrint();
+const pppSecrets = await client.PPPSecretPrint();
+
+console.log(systemResources[0]?.platform);
+console.log(systemIdentities[0]?.name);
+console.log(ipAddresses[0]?.address);
+console.log(pppSecrets[0]?.name);
 ```
+
+## Retorno dos métodos
+
+Os métodos `*Print()` seguem o comportamento observado no RouterOS REST e retornam arrays:
+
+- `SystemResourcePrint(): Promise<SystemResourcePrintResponse[]>`
+- `SystemIdentityPrint(): Promise<SystemIdentityPrintResponse[]>`
+- `IPAddressPrint(): Promise<IPAddressPrintResponse[]>`
+- `PPPSecretPrint(): Promise<PPPSecretPrintResponse[]>`
+
+Mesmo quando o endpoint representa um único item lógico, como `system/resource/print` e `system/identity/print`, a API REST do MikroTik retorna uma lista com um item.
 
 ## Scripts
 
 ```bash
 npm run build
+npm test
 npm run check:package
 ```
 
