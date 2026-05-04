@@ -41,7 +41,7 @@ O repositório já fica preparado para publicar no npm pelo workflow em `.github
 ```txt
 1. Criar o secret NPM_TOKEN no repositório GitHub
 2. Garantir que o nome do pacote em package.json esteja disponível no npm
-3. Atualizar a versão em package.json antes de cada release
+3. Atualizar a versão em package.json antes de cada push para deploy
 ```
 
 ### Como publicar
@@ -49,11 +49,12 @@ O repositório já fica preparado para publicar no npm pelo workflow em `.github
 ```txt
 1. Atualizar a versão em package.json
 2. Commitar e enviar as mudanças para a branch deploy
-3. Alternativamente, criar uma GitHub Release publicada
 3. O GitHub Actions executa npm ci, npm run build e npm publish --provenance
+4. Depois do publish, o workflow cria uma GitHub Release com a tag v<version>
+5. A página da release resume os commits desde a última tag, agrupando feat, fix, refactor, docs, test e chore
 ```
 
-Também é possível disparar o workflow manualmente pela aba Actions.
+Se a tag da versão já existir, o workflow pula o publish e a criação da release para evitar duplicidade no npm.
 
 - `api-ssl` (porta 8729) → usado por bibliotecas MikroTik
 - `www-ssl` (porta 443) → usado pelo REST (`/rest/...`)

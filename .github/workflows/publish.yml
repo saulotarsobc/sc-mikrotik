@@ -4,13 +4,9 @@ on:
   push:
     branches:
       - deploy
-  release:
-    types:
-      - published
-  workflow_dispatch:
 
 permissions:
-  contents: read
+  contents: write
   id-token: write
 
 concurrency:
@@ -24,6 +20,8 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
@@ -35,10 +33,153 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
+      - name: Resolve release metadata
+        id: metadata
+        shell: bash
+        run: |
+          VERSION=$(node -p "require('./package.json').version")
+          TAG="v${VERSION}"
+
+          git fetch --force --tags
+
+          if git rev-parse "$TAG" >/dev/null 2>&1; then
+            echo "should_publish=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "should_publish=true" >> "$GITHUB_OUTPUT"
+          fi
+
+          PREVIOUS_TAG=$(git tag --sort=-version:refname | grep -Fxv "$TAG" | head -n 1 || true)
+
+          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+          echo "tag=$TAG" >> "$GITHUB_OUTPUT"
+          echo "previous_tag=$PREVIOUS_TAG" >> "$GITHUB_OUTPUT"
+
       - name: Build package
         run: npm run build
 
+      - name: Generate release notes
+        if: steps.metadata.outputs.should_publish == 'true'
+        shell: bash
+        env:
+          CURRENT_TAG: ${{ steps.metadata.outputs.tag }}
+          CURRENT_VERSION: ${{ steps.metadata.outputs.version }}
+          PREVIOUS_TAG: ${{ steps.metadata.outputs.previous_tag }}
+        run: |
+          node <<'EOF'
+          const { execSync } = require('node:child_process');
+          const { writeFileSync } = require('node:fs');
+
+          const currentTag = process.env.CURRENT_TAG;
+          const currentVersion = process.env.CURRENT_VERSION;
+          const previousTag = process.env.PREVIOUS_TAG;
+
+          const separators = {
+            entry: '__SC_MIKROTIK_ENTRY__',
+            field: '__SC_MIKROTIK_FIELD__',
+          };
+
+          const range = previousTag ? `${previousTag}..HEAD` : 'HEAD';
+          const rawLog = execSync(
+            `git log ${range} --reverse --pretty=format:%H${separators.field}%s${separators.field}%b${separators.entry}`,
+            { encoding: 'utf8' }
+          ).trim();
+
+          const groups = new Map([
+            ['feat', { title: 'Features', items: [] }],
+            ['fix', { title: 'Fixes', items: [] }],
+            ['refactor', { title: 'Refactors', items: [] }],
+            ['docs', { title: 'Documentation', items: [] }],
+            ['test', { title: 'Tests', items: [] }],
+            ['chore', { title: 'Chores', items: [] }],
+            ['other', { title: 'Other Changes', items: [] }],
+          ]);
+
+          const commits = rawLog
+            ? rawLog
+                .split(separators.entry)
+                .map((entry) => entry.trim())
+                .filter(Boolean)
+                .map((entry) => {
+                  const [hash, subject, body = ''] = entry.split(separators.field);
+                  const trimmedSubject = subject.trim();
+                  const match = trimmedSubject.match(/^(feat|fix|refactor|docs|test|chore):\s+(.*)$/i);
+                  const type = match ? match[1].toLowerCase() : 'other';
+                  const summary = match ? match[2].trim() : trimmedSubject;
+                  const why = body
+                    .split('\n')
+                    .map((line) => line.trim())
+                    .filter(Boolean)
+                    .join(' ');
+
+                  return {
+                    hash,
+                    type,
+                    summary,
+                    why,
+                  };
+                })
+            : [];
+
+          for (const commit of commits) {
+            groups.get(commit.type)?.items.push(commit) ?? groups.get('other').items.push(commit);
+          }
+
+          const lines = [
+            `# ${currentTag}`,
+            '',
+            `Published from the deploy branch for package version ${currentVersion}.`,
+            '',
+            '## Commit Summary',
+            '',
+          ];
+
+          if (commits.length === 0) {
+            lines.push('- No commits found in this release range.');
+          } else {
+            for (const { title, items } of groups.values()) {
+              if (items.length === 0) {
+                continue;
+              }
+
+              lines.push(`### ${title}`);
+              lines.push('');
+
+              for (const item of items) {
+                lines.push(`- ${item.summary} (${item.hash.slice(0, 7)})`);
+                if (item.why) {
+                  lines.push(`  Why: ${item.why}`);
+                }
+              }
+
+              lines.push('');
+            }
+          }
+
+          if (previousTag) {
+            lines.push(`Compared with ${previousTag}.`);
+          } else {
+            lines.push('Initial automated release from repository history.');
+          }
+
+          writeFileSync('release-notes.md', `${lines.join('\n').trim()}\n`);
+          EOF
+
       - name: Publish to npm
+        if: steps.metadata.outputs.should_publish == 'true'
         run: npm publish --access public --provenance
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+
+      - name: Create GitHub release
+        if: steps.metadata.outputs.should_publish == 'true'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh release create "${{ steps.metadata.outputs.tag }}" \
+            --title "${{ steps.metadata.outputs.tag }}" \
+            --notes-file release-notes.md \
+            --target "$GITHUB_SHA"
+
+      - name: Skip existing version
+        if: steps.metadata.outputs.should_publish != 'true'
+        run: echo "Version ${{ steps.metadata.outputs.version }} already has tag ${{ steps.metadata.outputs.tag }}. Skipping npm publish and GitHub release."
