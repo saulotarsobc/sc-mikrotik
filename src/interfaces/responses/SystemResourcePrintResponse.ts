@@ -1,4 +1,4 @@
-export interface SystemResourceResponse {
+export interface SystemResourcePrintResponse {
   "architecture-name": string;
   "board-name": string;
   "build-time": string;

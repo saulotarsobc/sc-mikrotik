@@ -1,4 +1,4 @@
-export interface IpAddressResponse {
+export interface IPAddressPrintResponse {
   ".id": string;
   "actual-interface": string;
   address: string;
