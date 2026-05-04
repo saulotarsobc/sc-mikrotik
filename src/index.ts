@@ -1,10 +1,10 @@
 import axios from "axios";
 import https from "node:https";
-import { Auth } from "./interfaces/params/Auth";
-import { Config } from "./interfaces/params/Config";
-import { IpAddressResponse } from "./interfaces/responses/IpAddressResponse";
-import { SystemIdentityResponse } from "./interfaces/responses/SystemIdentityResponse";
-import { SystemResourceResponse } from "./interfaces/responses/SystemResourceResponse";
+import type { Auth } from "./interfaces/params/Auth";
+import type { Config } from "./interfaces/params/Config";
+import type { IpAddressResponse } from "./interfaces/responses/IpAddressResponse";
+import type { SystemIdentityResponse } from "./interfaces/responses/SystemIdentityResponse";
+import type { SystemResourceResponse } from "./interfaces/responses/SystemResourceResponse";
 
 export class Mikrotik {
   private client = axios.create();
@@ -52,25 +52,8 @@ export class Mikrotik {
   }
 }
 
-const main = async () => {
-  const mikrotik = new Mikrotik({
-    baseUrl: "https://192.168.1.111/rest",
-    username: "admin",
-    password: "asdf1234",
-    insecure: true,
-  });
-
-  const systemResource = await mikrotik.getSystemResource();
-  console.log("\nSystem Resource:");
-  console.log(systemResource);
-
-  const systemIdentity = await mikrotik.getSystemIdentity();
-  console.log("\nSystem Identity:");
-  console.log(systemIdentity);
-
-  const ipAddress = await mikrotik.getIpAddress();
-  console.log("\nIP Address:");
-  console.log(ipAddress);
-};
-
-main();
+export type { Auth } from "./interfaces/params/Auth";
+export type { Config } from "./interfaces/params/Config";
+export type { IpAddressResponse } from "./interfaces/responses/IpAddressResponse";
+export type { SystemIdentityResponse } from "./interfaces/responses/SystemIdentityResponse";
+export type { SystemResourceResponse } from "./interfaces/responses/SystemResourceResponse";
