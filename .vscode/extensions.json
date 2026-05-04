@@ -1,0 +1,9 @@
+{
+  "recommendations": [
+    "pkief.material-icon-theme",
+    "hediet.vscode-drawio",
+    "prisma.prisma",
+    "docker.docker",
+    "ms-azuretools.vscode-docker",
+  ]
+}
