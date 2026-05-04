@@ -16,12 +16,7 @@ body:
       description: Quais partes do produto ou da plataforma devem evoluir?
       multiple: true
       options:
-        - api (NestJS / endpoints)
-        - app (Next.js / PWA)
-        - mobile (Expo)
-        - bot (Telegram)
-        - database (Prisma / migrations)
-        - infra (Docker / Kubernetes / deploy)
+        - api
         - docs
     validations:
       required: true
@@ -61,12 +56,9 @@ body:
       multiple: true
       options:
         - Novo endpoint ou mudança na API
-        - Alteração de banco ou migration
-        - Alteração de interface web
-        - Alteração de experiência mobile
         - Ajuste em autenticação ou permissões
         - Mudança em integração externa
-        - Ajuste de deploy / infraestrutura
+        - Ajuste de deploy
         - Apenas documentação
     validations:
       required: true

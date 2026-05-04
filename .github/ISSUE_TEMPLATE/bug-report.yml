@@ -16,12 +16,7 @@ body:
       description: Selecione os módulos impactados pelo problema.
       multiple: true
       options:
-        - api (NestJS / endpoints)
-        - app (Next.js / PWA)
-        - mobile (Expo)
-        - bot (Telegram)
-        - database (Prisma / migrations)
-        - infra (Docker / Kubernetes / deploy)
+        - api
         - docs
     validations:
       required: true
@@ -34,13 +29,6 @@ body:
       multiple: true
       options:
         - Local development
-        - Staging
-        - Production
-        - Web
-        - PWA instalada
-        - Android
-        - iOS
-        - Telegram
         - API
     validations:
       required: true
