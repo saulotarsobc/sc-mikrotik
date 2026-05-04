@@ -1,6 +1,6 @@
 {
   "name": "sc-mikrotik",
-  "version": "0.0.2",
+  "version": "0.0.1",
   "description": "TypeScript client for the MikroTik RouterOS REST API.",
   "license": "ISC",
   "author": {
