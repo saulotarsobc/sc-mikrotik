@@ -38,21 +38,17 @@ O repositório já fica preparado para publicar no npm pelo workflow em `.github
 
 ### Pré-requisitos
 
-```txt
 1. Configurar o pacote no npm com Trusted Publishing apontando para o workflow publish.yml deste repositório
 2. Garantir que o nome do pacote em package.json esteja disponível no npm
 3. Atualizar a versão em package.json antes de cada push para deploy
-```
 
 ### Como publicar
 
-```txt
 1. Atualizar a versão em package.json
 2. Commitar e enviar as mudanças para a branch deploy
 3. O GitHub Actions executa npm ci, npm run build e npm publish --provenance usando OIDC, sem NPM_TOKEN
 4. Depois do publish, o workflow cria uma GitHub Release com a tag v<version>
 5. A página da release resume os commits desde a última tag, agrupando feat, fix, refactor, docs, test e chore
-```
 
 Se a tag da versão já existir, o workflow pula o publish e a criação da release para evitar duplicidade no npm.
 
@@ -72,5 +68,3 @@ Tenta forçar TLS 1.2 no curl (Windows às vezes dá bug com TLS):
 ```bash
 curl --tlsv1.2 -k -u admin:asdf1234 https://192.168.1.111/rest/system/resource
 ```
-
----
