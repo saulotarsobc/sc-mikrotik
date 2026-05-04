@@ -1,10 +1,10 @@
 import axios from "axios";
 import https from "node:https";
-import { Auth } from "./interfaces/Auth";
-import { Config } from "./interfaces/Config";
-import { IpAddressResponse } from "./interfaces/IpAddressResponse";
-import { SystemIdentityResponse } from "./interfaces/SystemIdentityResponse";
-import { SystemResourceResponse } from "./interfaces/SystemResourceResponse";
+import { Auth } from "./interfaces/params/Auth";
+import { Config } from "./interfaces/params/Config";
+import { IpAddressResponse } from "./interfaces/responses/IpAddressResponse";
+import { SystemIdentityResponse } from "./interfaces/responses/SystemIdentityResponse";
+import { SystemResourceResponse } from "./interfaces/responses/SystemResourceResponse";
 
 export class Mikrotik {
   private client = axios.create();
