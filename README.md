@@ -39,7 +39,7 @@ O repositório já fica preparado para publicar no npm pelo workflow em `.github
 ### Pré-requisitos
 
 ```txt
-1. Criar o secret NPM_TOKEN no repositório GitHub
+1. Configurar o pacote no npm com Trusted Publishing apontando para o workflow publish.yml deste repositório
 2. Garantir que o nome do pacote em package.json esteja disponível no npm
 3. Atualizar a versão em package.json antes de cada push para deploy
 ```
@@ -49,12 +49,14 @@ O repositório já fica preparado para publicar no npm pelo workflow em `.github
 ```txt
 1. Atualizar a versão em package.json
 2. Commitar e enviar as mudanças para a branch deploy
-3. O GitHub Actions executa npm ci, npm run build e npm publish --provenance
+3. O GitHub Actions executa npm ci, npm run build e npm publish --provenance usando OIDC, sem NPM_TOKEN
 4. Depois do publish, o workflow cria uma GitHub Release com a tag v<version>
 5. A página da release resume os commits desde a última tag, agrupando feat, fix, refactor, docs, test e chore
 ```
 
 Se a tag da versão já existir, o workflow pula o publish e a criação da release para evitar duplicidade no npm.
+
+O erro `EOTP` acontece quando a publicação usa um token tradicional que ainda exige código 2FA. Com Trusted Publishing, o npm autentica o workflow via OIDC e elimina essa dependência de OTP no CI.
 
 - `api-ssl` (porta 8729) → usado por bibliotecas MikroTik
 - `www-ssl` (porta 443) → usado pelo REST (`/rest/...`)
